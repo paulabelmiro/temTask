@@ -154,6 +154,11 @@ public class MainScreen extends javax.swing.JFrame {
         jLabelProjectsTitle.setText("PROJETOS");
 
         jLabelProjectsAdd.setIcon(new javax.swing.ImageIcon("C:\\Users\\Rodrigo Felipe Spies\\Downloads\\plus.png")); // NOI18N
+        jLabelProjectsAdd.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabelProjectsAddMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelProjectsLayout = new javax.swing.GroupLayout(jPanelProjects);
         jPanelProjects.setLayout(jPanelProjectsLayout);
@@ -212,6 +217,11 @@ public class MainScreen extends javax.swing.JFrame {
         jListProjects.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jListProjects.setFixedCellHeight(30);
         jListProjects.setSelectionBackground(new java.awt.Color(135, 243, 243));
+        jListProjects.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jListProjectsMouseClicked(evt);
+            }
+        });
         jScrollPaneProjects.setViewportView(jListProjects);
 
         javax.swing.GroupLayout jPanelProjectListLayout = new javax.swing.GroupLayout(jPanelProjectList);
@@ -307,6 +317,18 @@ public class MainScreen extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jListProjectsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jListProjectsMouseClicked
+        ProjectJDialogScreen projectJDialogScreen = new ProjectJDialogScreen(this, rootPaneCheckingEnabled);
+        projectJDialogScreen.setVisible(true);
+        
+    }//GEN-LAST:event_jListProjectsMouseClicked
+
+    private void jLabelProjectsAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelProjectsAddMouseClicked
+        TasksJDialogScreen tasksJDialogScreen = new TasksJDialogScreen(this, rootPaneCheckingEnabled);
+        //tasksJDialogScreen.setProject(null);
+        tasksJDialogScreen.setVisible(true);
+    }//GEN-LAST:event_jLabelProjectsAddMouseClicked
 
     /**
      * @param args the command line arguments
