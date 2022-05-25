@@ -4,8 +4,15 @@
  */
 package view;
 
+import controller.ProjectController;
+import controller.TaskController;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
+import javax.swing.DefaultListModel;
+import model.Project;
 
 /**
  *
@@ -13,12 +20,17 @@ import java.awt.Font;
  */
 public class MainScreen extends javax.swing.JFrame {
 
-    /**
-     * Creates new form MainScreen
-     */
+    ProjectController projectController;
+    TaskController taskController;
+    
+    DefaultListModel projectModel;
+    
     public MainScreen() {
         initComponents();
         decorateTableTasks();
+        
+        initDataController();
+        initComponentsModel();
     }
 
     /**
@@ -135,7 +147,7 @@ public class MainScreen extends javax.swing.JFrame {
         jPanelToolBarLayout.setHorizontalGroup(
             jPanelToolBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jLabelToolBarTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jLabelToolBarSubTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE)
+            .addComponent(jLabelToolBarSubTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanelToolBarLayout.setVerticalGroup(
             jPanelToolBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -167,7 +179,7 @@ public class MainScreen extends javax.swing.JFrame {
             .addGroup(jPanelProjectsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabelProjectsTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabelProjectsAdd)
                 .addContainerGap())
         );
@@ -186,6 +198,11 @@ public class MainScreen extends javax.swing.JFrame {
         jLabelTasksTitle.setText("TAREFAS");
 
         jLabelTasksAdd.setIcon(new javax.swing.ImageIcon("C:\\Users\\Rodrigo Felipe Spies\\Downloads\\plus.png")); // NOI18N
+        jLabelTasksAdd.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabelTasksAddMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelTasksLayout = new javax.swing.GroupLayout(jPanelTasks);
         jPanelTasks.setLayout(jPanelTasksLayout);
@@ -209,19 +226,9 @@ public class MainScreen extends javax.swing.JFrame {
         jListProjects.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jListProjects.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jListProjects.setForeground(new java.awt.Color(102, 102, 102));
-        jListProjects.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         jListProjects.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jListProjects.setFixedCellHeight(30);
         jListProjects.setSelectionBackground(new java.awt.Color(135, 243, 243));
-        jListProjects.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jListProjectsMouseClicked(evt);
-            }
-        });
         jScrollPaneProjects.setViewportView(jListProjects);
 
         javax.swing.GroupLayout jPanelProjectListLayout = new javax.swing.GroupLayout(jPanelProjectList);
@@ -318,17 +325,23 @@ public class MainScreen extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jListProjectsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jListProjectsMouseClicked
+    private void jLabelProjectsAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelProjectsAddMouseClicked
         ProjectJDialogScreen projectJDialogScreen = new ProjectJDialogScreen(this, rootPaneCheckingEnabled);
         projectJDialogScreen.setVisible(true);
         
-    }//GEN-LAST:event_jListProjectsMouseClicked
+        projectJDialogScreen.addWindowListener(new WindowAdapter(){
+          public void windowCloded(WindowEvent e){
+              loadProjects();
+          }  
+        });
+        
+    }//GEN-LAST:event_jLabelProjectsAddMouseClicked
 
-    private void jLabelProjectsAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelProjectsAddMouseClicked
+    private void jLabelTasksAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelTasksAddMouseClicked
         TasksJDialogScreen tasksJDialogScreen = new TasksJDialogScreen(this, rootPaneCheckingEnabled);
         //tasksJDialogScreen.setProject(null);
         tasksJDialogScreen.setVisible(true);
-    }//GEN-LAST:event_jLabelProjectsAddMouseClicked
+    }//GEN-LAST:event_jLabelTasksAddMouseClicked
 
     /**
      * @param args the command line arguments
@@ -400,4 +413,25 @@ public void decorateTableTasks(){
     jTableTasks.setAutoCreateRowSorter(true);
 }
 
+public void initDataController(){
+    projectController = new ProjectController();
+    taskController = new TaskController();
+}
+
+public void initComponentsModel(){
+    projectModel = new DefaultListModel();
+    loadProjects();
+}
+
+public void loadProjects(){
+    List<Project> projects = projectController.getAll();
+    
+    projectModel.clear();
+    
+    for (int i = 0; i < projects.size(); i++){
+        Project project = projects.get(i);
+        projectModel.addElement(project);
+    }
+    jListProjects.setModel(projectModel);
+}
 }
