@@ -232,6 +232,11 @@ public class MainScreen extends javax.swing.JFrame {
         jListProjects.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jListProjects.setFixedCellHeight(30);
         jListProjects.setSelectionBackground(new java.awt.Color(135, 243, 243));
+        jListProjects.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jListProjectsMouseClicked(evt);
+            }
+        });
         jScrollPaneProjects.setViewportView(jListProjects);
 
         javax.swing.GroupLayout jPanelProjectListLayout = new javax.swing.GroupLayout(jPanelProjectList);
@@ -246,6 +251,7 @@ public class MainScreen extends javax.swing.JFrame {
         );
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel6.setLayout(new java.awt.BorderLayout());
 
         jTableTasks.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jTableTasks.setModel(new javax.swing.table.DefaultTableModel(
@@ -278,23 +284,14 @@ public class MainScreen extends javax.swing.JFrame {
         jTableTasks.setRowHeight(40);
         jTableTasks.setSelectionBackground(new java.awt.Color(135, 243, 243));
         jTableTasks.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jTableTasks.setShowVerticalLines(false);
+        jTableTasks.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableTasksMouseClicked(evt);
+            }
+        });
         jScrollPaneTasks.setViewportView(jTableTasks);
 
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addComponent(jScrollPaneTasks, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addComponent(jScrollPaneTasks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
+        jPanel6.add(jScrollPaneTasks, java.awt.BorderLayout.CENTER);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -343,9 +340,46 @@ public class MainScreen extends javax.swing.JFrame {
 
     private void jLabelTasksAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelTasksAddMouseClicked
         TasksJDialogScreen tasksJDialogScreen = new TasksJDialogScreen(this, rootPaneCheckingEnabled);
-        //tasksJDialogScreen.setProject(null);
+        
+        int projectIndex = jListProjects.getSelectedIndex();
+        Project project = (Project) projectsModel.get(projectIndex);
+        tasksJDialogScreen.setProject(project);
         tasksJDialogScreen.setVisible(true);
+        
+        tasksJDialogScreen.addWindowListener(new WindowAdapter(){
+            public void windowCloded(WindowEvent e){
+                int projectIndex = jListProjects.getSelectedIndex();
+                Project project = (Project) projectsModel.get(projectIndex);
+                loadTasks(project.getId());
+            }
+        });
     }//GEN-LAST:event_jLabelTasksAddMouseClicked
+
+    private void jTableTasksMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableTasksMouseClicked
+        int rowIndex = jTableTasks.rowAtPoint(evt.getPoint());
+        int columnIndex = jTableTasks.columnAtPoint(evt.getPoint());
+        Task task = taskModel.getTasks().get(rowIndex);
+        
+        switch(columnIndex){
+            case 3:
+                taskController.update(task);
+                break;
+            case 5:
+                taskController.removeById(task.getId());
+                taskModel.getTasks().remove(task);
+                
+                int projectIndex = jListProjects.getSelectedIndex();
+                Project project = (Project) projectsModel.get(projectIndex);
+                loadTasks(project.getId());
+                break;
+        }
+    }//GEN-LAST:event_jTableTasksMouseClicked
+
+    private void jListProjectsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jListProjectsMouseClicked
+        int projectIndex = jListProjects.getSelectedIndex();
+        Project project = (Project) projectsModel.get(projectIndex);
+        loadTasks(project.getId());
+    }//GEN-LAST:event_jListProjectsMouseClicked
 
     /**
      * @param args the command line arguments
@@ -428,12 +462,39 @@ public void initComponentsModel(){
     
     taskModel = new TasksTableModel();
     jTableTasks.setModel(taskModel);
-    loadTasks(1);//alterar para idProject
+        
+    if(!projectsModel.isEmpty()){
+        jListProjects.setSelectedIndex(0);
+        Project project = (Project) projectsModel.get(0);
+        loadTasks(project.getId());
+    }
 }
 
 public void loadTasks(int idProject){
     List<Task> tasks = taskController.getAll(idProject); 
     taskModel.setTasks(tasks);
+    
+    showJTableTasks(!tasks.isEmpty());
+}
+
+private void showJTableTasks(boolean hasTasks){
+    if(hasTasks){
+        if(jPanelEmptyList.isVisible()){
+            jPanelEmptyList.setVisible(false);
+            jPanel6.remove(jPanelEmptyList);
+        }
+        jPanel6.add(jScrollPaneTasks);
+        jScrollPaneTasks.setVisible(true);
+        jScrollPaneTasks.setSize(jPanel6.getWidth(), jPanel6.getHeight());
+    } else {
+        if(jScrollPaneTasks.isVisible()){
+            jScrollPaneTasks.setVisible(false);
+            jPanel6.remove(jScrollPaneTasks);
+        }
+        jPanel6.add(jPanelEmptyList);
+        jPanelEmptyList.setVisible(true);
+        jPanelEmptyList.setSize(jPanel6.getWidth(), jPanel6.getHeight());
+    }
 }
 
 public void loadProjects(){
